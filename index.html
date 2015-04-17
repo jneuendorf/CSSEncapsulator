@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>CSSEncapsulator</title>
+
+        <link rel="stylesheet" href="jasmine/jasmine.css" media="screen" title="no title" charset="utf-8" />
+
+        <script src="jasmine/jasmine.js" type="text/javascript" charset="utf-8"></script>
+        <script src="jasmine/jasmine-html.js" type="text/javascript" charset="utf-8"></script>
+        <script src="jasmine/boot.js" type="text/javascript" charset="utf-8"></script>
+
+        <link rel="stylesheet" href="defaultStyle.css" media="screen" title="no title" charset="utf-8" />
+
+        <script src="CSSEncapsulator.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body>
+        <!-- FOLLOWING DOM ELEMENTS USED FOR TESTING. SEE Test.coffee -->
+        <div class="top">
+            <div class="header">
+                <span>should be blue</span>
+            </div>
+            <div class="content">
+                <span>asdf (anything but blue!)</span>
+                <div class="div">
+                    <h1>HEADING</h1>
+                    <p>
+                        some very funny text
+                    </p>
+                </div>
+            </div>
+            <div class="footer"></div>
+        </div>
+    </body>
+</html>
