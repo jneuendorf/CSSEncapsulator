@@ -10,7 +10,7 @@ randStr = (len=16) ->
 
 class window.CSSEncapsulator
 
-    constructor: (root, css={}, prefix=16) ->
+    constructor: (root, css={}, prefix=16, apply=true) ->
         if typeof jQuery isnt "undefined" and root instanceof jQuery
             @root = root[0]
         else
@@ -26,6 +26,52 @@ class window.CSSEncapsulator
                     @prefix = prefix
 
                 break unless document.getElementById @prefix
+
+        if apply is true
+            @apply()
+
+
+    apply: () ->
+        # NOTE: browser support for document.head:
+        #       Chrome    Firefox   MSIE    Opera    Safari
+        #       4.0       4.0       9.0     11.0     5.0
+
+        ###
+        css = 'h1 { background: red; }'
+        head = document.head || document.getElementsByTagName('head')[0]
+        style = document.createElement('style')
+
+        style.type = 'text/css'
+        if style.styleSheet
+            style.styleSheet.cssText = css
+        else
+            style.appendChild(document.createTextNode(css))
+
+        head.appendChild(style)
+
+        ###
+
+        @root.id = @prefix
+
+        rules = @css.rules
+        order = @css.order
+        css = ""
+
+        for key in order
+            css += "##{@prefix} #{key} { #{rules[key]} }\n"
+
+        head = document.head or document.getElementsByTagName("head")[0]
+        style = document.createElement("style")
+
+        style.type = "text/css"
+        if style.styleSheet
+            style.styleSheet.cssText = css
+        else
+            style.appendChild(document.createTextNode(css))
+
+        head.appendChild(style)
+
+        return @
 
     defineCSS: (data) ->
         ###
@@ -43,6 +89,8 @@ class window.CSSEncapsulator
                 # child
                 "div.class":
                     height: "20px"
+                    ":hover":
+                        height: "30px"
                 # 3rd body property:
                 "font-weight": "bold"
             "#main":
@@ -51,37 +99,54 @@ class window.CSSEncapsulator
                 color: red
         }
         all selectors are interpreted relative to this.root
+
+        ====>
+
+        [
+            "body":                 "font-family: Arial; font-size: 20pt; font-weight: bold;"
+            "body span":            "color: black; text-decoration: underline;"
+            "body div.class":       "height: 20px;"
+            "body div.class:hover": "height: 30px;"
+            "#main":                "float: left;"
+            ".xy":                  "color: red;"
+        ]
         ###
 
         # prev  = selector so far
         # obj   = remaining data
         # res   = accumulator -> result
-        createSelectors = (prev, obj, res=[]) ->
+        createSelectors = (prev, obj, res, order) ->
+            defs = ""
+            for key, val of obj
+                # key-val pair is an attribute definition
+                if typeof val is "string"
+                    defs += "#{key}: #{val}; "
+                # key-val pair is a selector
+                else
+                    # pseudo class/element => don't insert white space
+                    if key[0] is ":"
+                        selector = "#{prev}#{key}"
+                    else
+                        selector = "#{prev} #{key}"
 
+                    order.push selector
+                    createSelectors(selector, val, res, order)
 
+            if prev.length > 0
+                if res[prev]
+                    res[prev] += defs.trim()
+                else
+                    res[prev] = defs.trim()
+                # res.push prev, defs.trim()
             return obj
 
 
 
-        ruleSets = []
-        createSelectors("", data, ruleSets)
+        rules = {}
+        order = []
+        createSelectors("", data, rules, order)
 
-        # NOTE: browser support:
-        #       Chrome    Firefox   MSIE    Opera    Safari
-        #       4.0       4.0       9.0     11.0     5.0
-        document.head
-
-        ###
-        css = 'h1 { background: red; }'
-        head = document.head || document.getElementsByTagName('head')[0]
-        style = document.createElement('style')
-
-        style.type = 'text/css'
-        if style.styleSheet
-          style.styleSheet.cssText = css
-        else
-          style.appendChild(document.createTextNode(css))
-
-        head.appendChild(style)
-
-        ###
+        return {
+            rules: rules
+            order: order
+        }

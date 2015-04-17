@@ -9,6 +9,11 @@ describe "CSSEncapsulator", () ->
         {
             "span":
                 "color": "green"
+                "font-weight": "bold"
+                ":hover":
+                    "color": "red"
+            ".testclass":
+                "text-decoration": "underline"
         }
         32
     )

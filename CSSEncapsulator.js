@@ -18,12 +18,15 @@
   };
 
   window.CSSEncapsulator = (function() {
-    function CSSEncapsulator(root, css, prefix) {
+    function CSSEncapsulator(root, css, prefix, apply) {
       if (css == null) {
         css = {};
       }
       if (prefix == null) {
         prefix = 16;
+      }
+      if (apply == null) {
+        apply = true;
       }
       if (typeof jQuery !== "undefined" && root instanceof jQuery) {
         this.root = root[0];
@@ -43,7 +46,46 @@
           }
         }
       }
+      if (apply === true) {
+        this.apply();
+      }
     }
+
+    CSSEncapsulator.prototype.apply = function() {
+
+      /*
+      css = 'h1 { background: red; }'
+      head = document.head || document.getElementsByTagName('head')[0]
+      style = document.createElement('style')
+      
+      style.type = 'text/css'
+      if style.styleSheet
+          style.styleSheet.cssText = css
+      else
+          style.appendChild(document.createTextNode(css))
+      
+      head.appendChild(style)
+       */
+      var css, head, j, key, len1, order, rules, style;
+      this.root.id = this.prefix;
+      rules = this.css.rules;
+      order = this.css.order;
+      css = "";
+      for (j = 0, len1 = order.length; j < len1; j++) {
+        key = order[j];
+        css += "#" + this.prefix + " " + key + " { " + rules[key] + " }\n";
+      }
+      head = document.head || document.getElementsByTagName("head")[0];
+      style = document.createElement("style");
+      style.type = "text/css";
+      if (style.styleSheet) {
+        style.styleSheet.cssText = css;
+      } else {
+        style.appendChild(document.createTextNode(css));
+      }
+      head.appendChild(style);
+      return this;
+    };
 
     CSSEncapsulator.prototype.defineCSS = function(data) {
 
@@ -62,6 +104,8 @@
                * child
               "div.class":
                   height: "20px"
+                  ":hover":
+                      height: "30px"
                * 3rd body property:
               "font-weight": "bold"
           "#main":
@@ -70,16 +114,52 @@
               color: red
       }
       all selectors are interpreted relative to this.root
+      
+      ====>
+      
+      [
+          "body":                 "font-family: Arial; font-size: 20pt; font-weight: bold;"
+          "body span":            "color: black; text-decoration: underline;"
+          "body div.class":       "height: 20px;"
+          "body div.class:hover": "height: 30px;"
+          "#main":                "float: left;"
+          ".xy":                  "color: red;"
+      ]
        */
-      var createSelectors, ruleSets;
-      createSelectors = function(prev, obj, res) {
-        if (res == null) {
-          res = [];
+      var createSelectors, order, rules;
+      createSelectors = function(prev, obj, res, order) {
+        var defs, key, selector, val;
+        defs = "";
+        for (key in obj) {
+          val = obj[key];
+          if (typeof val === "string") {
+            defs += key + ": " + val + "; ";
+          } else {
+            if (key[0] === ":") {
+              selector = "" + prev + key;
+            } else {
+              selector = prev + " " + key;
+            }
+            order.push(selector);
+            createSelectors(selector, val, res, order);
+          }
+        }
+        if (prev.length > 0) {
+          if (res[prev]) {
+            res[prev] += defs.trim();
+          } else {
+            res[prev] = defs.trim();
+          }
         }
         return obj;
       };
-      ruleSets = [];
-      return createSelectors("", data, ruleSets);
+      rules = {};
+      order = [];
+      createSelectors("", data, rules, order);
+      return {
+        rules: rules,
+        order: order
+      };
     };
 
     return CSSEncapsulator;
@@ -101,8 +181,15 @@
     var instance, loadingTime, start;
     start = Date.now();
     instance = new CSSEncapsulator(document.querySelector(".content"), {
-      span: {
-        color: green
+      "span": {
+        "color": "green",
+        "font-weight": "bold",
+        ":hover": {
+          "color": "red"
+        }
+      },
+      ".testclass": {
+        "text-decoration": "underline"
       }
     }, 32);
     loadingTime = Date.now() - start;
