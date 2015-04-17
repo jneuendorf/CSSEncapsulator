@@ -6,7 +6,7 @@ A JavaScript tool that breaks CSS inheritance for a specific area.
 
 Include the development or production version of the script in your browser:
 
-```javascript
+```html
 <script type="text/javascript" src="CSSEncapsulator.min.js"></script>
 ```
 
