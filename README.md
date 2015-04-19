@@ -56,8 +56,7 @@ The constructor has the following signature:
 
 #### Example:
 
-Given HTML:
-
+HTML:
 ```html
 <body>
     <div class="top">
@@ -75,8 +74,10 @@ Given HTML:
         </div>
         <div class="footer"></div>
     </div>
-</body>```
+</body>
+```
 
+JavaScript:
 ```javascript
 new CSSEncapsulator(document.querySelector(".content"), {
     "color": "yellow",
