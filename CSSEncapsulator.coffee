@@ -11,7 +11,7 @@ randStr = (len=16) ->
 ###*
 * @class CSSEncapsulator
 *
-* @property root {HTMLElement}
+* @property root {HTMLElement|jQuery}
 * @property identifier {String}
 * @property css {Object}
 * @property cssString {String}
@@ -21,6 +21,7 @@ randStr = (len=16) ->
 * @param root {HTMLElement|jQuery}
 * @param css {Object|String}
 * @param identifier {Number|String}
+* @param apply {Boolean}
 *###
 class window.CSSEncapsulator
 
@@ -41,13 +42,12 @@ class window.CSSEncapsulator
 
                 break unless document.getElementById @identifier
 
-
         if typeof css is "string"
             @css = null
             @cssString = css
         else
-            @css = @defineCSS(css)
-            @stringifyCSS()
+            @css = @_defineCSS(css)
+            @_stringifyCSS()
 
         @styleSheet = null
 
@@ -57,7 +57,7 @@ class window.CSSEncapsulator
 
     apply: (rebuildCSS=false) ->
         if not @cssString? or rebuildCSS is true
-            @stringifyCSS()
+            @_stringifyCSS()
 
         head    = document.head or document.getElementsByTagName("head")[0]
         style   = document.createElement "style"
@@ -79,7 +79,7 @@ class window.CSSEncapsulator
 
         return @
 
-    stringifyCSS: () ->
+    _stringifyCSS: () ->
         @root.id = @identifier
 
         rules = @css.rules
@@ -92,7 +92,7 @@ class window.CSSEncapsulator
         @cssString = css
         return @
 
-    defineCSS: (data) ->
+    _defineCSS: (data) ->
         ###
         data is like:
         {
