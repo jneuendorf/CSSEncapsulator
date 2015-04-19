@@ -1,5 +1,5 @@
 PROJECT_NAME = CSSEncapsulator
-FILES = $(PROJECT_NAME).coffee Error.coffee linking.coffee
+FILES = $(PROJECT_NAME).coffee
 
 make:
 	cat $(FILES) | coffee --compile --stdio > $(PROJECT_NAME).js

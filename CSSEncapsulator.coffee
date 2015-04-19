@@ -32,7 +32,6 @@ class window.CSSEncapsulator
         else
             @root = root
 
-
         if identifier?
             loop
                 if typeof identifier is "number"
@@ -56,21 +55,20 @@ class window.CSSEncapsulator
             @apply()
 
 
-    apply: () ->
-        if not @cssString?
+    apply: (rebuildCSS=false) ->
+        if not @cssString? or rebuildCSS is true
             @stringifyCSS()
 
-        # NOTE: browser support for document.head:
-        #       Chrome    Firefox   MSIE    Opera    Safari
-        #       4.0       4.0       9.0     11.0     5.0
         head    = document.head or document.getElementsByTagName("head")[0]
-        style   = document.createElement("style")
+        style   = document.createElement "style"
 
         style.type = "text/css"
         if style.styleSheet
             style.styleSheet.cssText = CSS_COMMENT + @cssString
         else
             style.appendChild document.createTextNode(CSS_COMMENT + @cssString)
+
+        style.setAttribute("data-id", @identifier)
 
         if @styleSheet?
             head.removeChild @styleSheet
