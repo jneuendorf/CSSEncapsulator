@@ -25,7 +25,7 @@ Use `make test` to create test version (development code + jasmine tests). The t
 Requirements:
 - coffee
 - cat
-- ugluglifyjs
+- uglifyjs
 
 
 ## Testing
