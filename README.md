@@ -22,6 +22,11 @@ Use `make production` to create development and production version.
 
 Use `make test` to create test version (development code + jasmine tests). The test file is also called `JQL.js` so you just need to refresh your browser.
 
+Requirements:
+- coffee
+- cat
+- ugluglifyjs
+
 
 ## Testing
 
